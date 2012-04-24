@@ -40,7 +40,7 @@ module Binpack
         @rows[i + @padding, item.height].each{ |s|
           s[idx + @padding, item.width] = "#{g}" * item.width
         }
-        @items.push([item, idx + @padding, i + @padding])
+        @items.push([item, idx, i])
         return item
       }
       nil
@@ -75,3 +75,14 @@ module Binpack
     end
   end
 end
+
+items = []
+12.times do |i|
+  items << Binpack::Item.new("Associated object #{i+1}", (rand(10)+2)/2.0, (rand(10)+2)/2.0)
+end
+
+# Pack the array of items into a bin where the default bin size is 16x10 with a padding of 1
+bins = Binpack::Bin.pack(items, [], Binpack::Bin.new(16, 10, 1))
+
+puts bins.join("\n\n")
+puts bins[0].items.inspect
