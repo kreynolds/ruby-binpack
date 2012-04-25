@@ -19,7 +19,7 @@ module Binpack
     def initialize(width, height, padding=1)
       @width, @height, @padding = width, height, padding.to_i
       @items = []
-      @rows = (@padding..@height + (@padding * 2)).map{ "_"*(@width + (@padding * 2)) }
+      @rows = (0...@height + (@padding * 2)).map{ "_"*(@width + (@padding * 2)) }
     end
 
     def add(item)
@@ -28,17 +28,17 @@ module Binpack
     alias_method "<<".to_sym, :add
     
     def try_adding(item)
-      itemrow = "_" * (item.width + (@padding * 2))
+      itemrow = "_" * (item.width.ceil + (@padding * 2))
       @rows.each_with_index {|r,i|
-        break if i > @rows.size - (item.width + @padding * 2)
+        break if i > @rows.size - (item.height.ceil + @padding * 2)
         next unless r.include?(itemrow)
-        idxs = @rows[i + @padding, item.height + @padding].map { |s| s.index(itemrow) }
+        idxs = @rows[i + @padding, item.height.ceil + @padding].map { |s| s.index(itemrow) }
         next unless idxs.all?
         idx = idxs.max
-        next unless @rows[i, item.height + (@padding*2)].all? { |s| s[idx,itemrow.size] == itemrow }
+        next unless @rows[i, item.height.ceil + (@padding * 2)].all? { |s| s[idx,itemrow.size] == itemrow }
         g = rand(16).to_s(16)
-        @rows[i + @padding, item.height].each{ |s|
-          s[idx + @padding, item.width] = "#{g}" * item.width
+        @rows[i + @padding, item.height.ceil].each{ |s|
+          s[idx + @padding, item.width.ceil] = "#{g}" * item.width.ceil
         }
         @items.push([item, idx, i])
         return item
