@@ -1,11 +1,20 @@
 #require "binpack/version"
 
 module Binpack
-  class Item
-    attr_reader :width, :height, :rotated, :obj
+  class UnrotatableItem
+    attr_reader :width, :height, :obj
+
+    def initialize(obj, width, height)
+      @obj, @width, @height = obj, width, height
+    end
+  end
+
+  class Item < UnrotatableItem
+    attr_reader :rotated
 
     def initialize(obj, width, height, rotated=false)
-      @obj, @width, @height, @rotated = obj, width, height, rotated
+      super obj, width, height
+      @rotated = rotated
     end
 
     def rotate
@@ -23,7 +32,11 @@ module Binpack
     end
 
     def add(item)
-      try_adding(item) or try_adding(item.rotate)
+      if added = try_adding(item)
+        return added
+      elsif item.is_a?(Item)
+        return try_adding(item.rotate)
+      end
     end
     alias_method "<<".to_sym, :add
     
